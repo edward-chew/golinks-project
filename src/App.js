@@ -1,23 +1,13 @@
-import logo from './logo.svg';
-import './App.css';
+import DataTable from "./DataTable";
+import "./styles/App.css";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="m-auto w-8/12 py-20 font-sans">
+      <h1 className="mb-10 font-bold text-7xl text-center">
+        GitHub Stats Lookup
+      </h1>
+      <DataTable />
     </div>
   );
 }
