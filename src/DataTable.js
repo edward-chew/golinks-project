@@ -21,7 +21,6 @@ export default function DataTable() {
 
   return (
     <>
-      <p>seantomburke</p>
       <div className="m-auto flex flex-row justify-center">
         <input
           type="text"
