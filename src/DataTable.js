@@ -1,22 +1,47 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import axios from "axios";
 
 export default function DataTable() {
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState();
+  const [stats, setStats] = useState({});
   const [username, setUsername] = useState("");
+  const [minRepos, setMinRepos] = useState(0);
+
+  const filteredLanguages = useMemo(
+    () => filterLanguages(stats.languages, minRepos),
+    [stats, minRepos]
+  );
 
   async function fetchStats() {
-    setStats(null);
     setLoading(true);
-    const res = await axios.get(`http://localhost:5001/users/seantomburke`);
+    setStats({});
+    const res = await axios.get(`http://localhost:5001/users/${username}`);
     setStats(res.data);
-    console.log(res);
     setLoading(false);
   }
 
   function handleUsernameChange(e) {
     setUsername(e.target.value);
+  }
+
+  function handleMinReposChange(e) {
+    setMinRepos(e.target.value);
+  }
+
+  function filterLanguages(langs, minRepos) {
+    console.log("filtering");
+    if (!langs || Object.keys(langs).length === 0) {
+      return {};
+    }
+
+    let newLangs = {};
+    for (const key of Object.keys(langs)) {
+      if (langs[key] >= minRepos) {
+        newLangs[key] = langs[key];
+      }
+    }
+    console.log(newLangs);
+    return newLangs;
   }
 
   return (
@@ -25,6 +50,7 @@ export default function DataTable() {
         <input
           type="text"
           onChange={handleUsernameChange}
+          value={username}
           className="border h-16 w-4/12 mr-4 p-4 rounded-md"
         />
         <button
@@ -34,34 +60,46 @@ export default function DataTable() {
           Get Stats
         </button>
       </div>
-      {stats && (
+      {Object.keys(stats).length !== 0 && (
         <>
           <table className="w-full mt-12">
-            <tr className="hover:bg-slate-50">
-              <th className="text-left p-4">Total Repositories</th>
-              <td>{stats.public_repos}</td>
-            </tr>
-            <tr className="border-t hover:bg-slate-50">
-              <th className="text-left p-4">Total Forks</th>
-              <td>{stats.fork_count}</td>
-            </tr>
-          </table>
-          <table className="w-full mt-6">
-            <tr>
-              <th colspan="2" className="text-left p-4 text-center">
-                Top Languages
-              </th>
-            </tr>
-            {Object.keys(stats.languages).map((lang) => (
-              <tr className="border-t hover:bg-slate-50">
-                <th className="p-4 text-left">{lang}</th>
-                <td>{stats.languages[lang]}</td>
+            <tbody>
+              <tr className="hover:bg-slate-50">
+                <th className="text-left p-4">Total Repositories</th>
+                <td>{stats.public_repos}</td>
               </tr>
-            ))}
+              <tr className="border-t hover:bg-slate-50">
+                <th className="text-left p-4">Total Forks</th>
+                <td className="w-2/12">{stats.fork_count}</td>
+              </tr>
+            </tbody>
+          </table>
+          <h2 className="text-center font-bold text-xl mt-12">Top Languages</h2>
+          <div className="flex flex-col">
+            <label htmlFor="minRepos" className="text-sm text-slate-500">
+              Min Repos
+            </label>
+            <input
+              id="minRepos"
+              type="text"
+              onChange={handleMinReposChange}
+              value={minRepos}
+              className="border w-2/12 mt-1 p-2 rounded-md"
+            />
+          </div>
+          <table className="w-full mt-6">
+            <tbody>
+              {Object.keys(filteredLanguages).map((lang) => (
+                <tr className="border-t hover:bg-slate-50" key={lang}>
+                  <th className="p-4 text-left">{lang}</th>
+                  <td className="w-2/12">{filteredLanguages[lang]}</td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </>
       )}
-      {loading && <p clasName="text-center m-auto mt-12">Loading...</p>}
+      {loading && <p className="text-center m-auto mt-12">Loading...</p>}
     </>
   );
 }
